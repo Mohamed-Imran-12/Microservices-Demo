@@ -20,26 +20,26 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/order")
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest){
-        OrderResponse body = orderService.createOrder(orderRequest);
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest, @RequestHeader("X-User-Email") String email) {
+        OrderResponse body = orderService.createOrder(orderRequest, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @GetMapping("/orders/user/{userId}")
-    public ResponseEntity<List<OrderDetails>> getOrders(@PathVariable Long userId,  @RequestHeader("X-User-Email") String email, @RequestHeader("X-User-Role") String role){
-        List<OrderDetails> body = orderService.getOrders(userId,email,role);
+    public ResponseEntity<List<OrderDetails>> getOrders(@PathVariable Long userId, @RequestHeader("X-User-Email") String email, @RequestHeader("X-User-Role") String role) {
+        List<OrderDetails> body = orderService.getOrders(userId, email, role);
         return ResponseEntity.ok(body);
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long orderId){
-        OrderResponse body = orderService.getOrder(orderId);
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long orderId, @RequestHeader("X-User-Email") String email, @RequestHeader("X-User-Role") String role) {
+        OrderResponse body = orderService.getOrder(orderId, email, role);
         return ResponseEntity.ok(body);
     }
 
     @PutMapping("/order/cancel/{orderId}")
-    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long orderId){
-        OrderResponse body = orderService.cancelOrder(orderId);
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long orderId, @RequestHeader("X-User-Email") String email, @RequestHeader("X-User-Role") String role) {
+        OrderResponse body = orderService.cancelOrder(orderId, email, role);
         return ResponseEntity.ok(body);
     }
 }

@@ -35,11 +35,14 @@ public class OrderService {
 
 
     @Transactional
-    public OrderResponse createOrder(OrderRequest orderRequest) {
+    public OrderResponse createOrder(OrderRequest orderRequest, String email) {
         SalesOrderRequest salesOrderRequest = null;
         boolean isProcessed = false;
         try {
-            userClient.getUser(orderRequest.getUserId());
+            UserResponse user = userClient.getUser(orderRequest.getUserId()).getBody();
+            if (!user.getEmail().equals(email)){
+                throw new OrderProcessingException();
+            }
             BigDecimal totalAmount = BigDecimal.ZERO;
 
             Order order = Order.builder()
@@ -150,9 +153,13 @@ public class OrderService {
                 .toList();
     }
 
-    public OrderResponse getOrder(Long orderId) {
+    public OrderResponse getOrder(Long orderId, String email, String role) {
         Order order = orderRepository.findById(orderId).orElseThrow(() ->
                 new OrderNotFoundException("Order id " + orderId + " not exist"));
+        UserResponse user = userClient.getUser(order.getUserId()).getBody();
+        if ("USER".equals(role) && !user.getEmail().equals(email)){
+            throw new OrderNotFoundException();
+        }
         List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
         Map<Long, ProductResponse> productResponses = productClient.getAllProductsByIds(
                 orderItems
@@ -180,9 +187,13 @@ public class OrderService {
     }
 
 
-    public OrderResponse cancelOrder(Long orderId) {
+    public OrderResponse cancelOrder(Long orderId, String email, String role) {
         Order order = orderRepository.findById(orderId).orElseThrow(()->
                 new OrderNotFoundException("Order id " + orderId + " not exist"));
+        UserResponse user = userClient.getUser(order.getUserId()).getBody();
+        if ("USER".equals(role) && !user.getEmail().equals(email)){
+            throw new OrderNotFoundException();
+        }
         List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
         if(order.getStatus() != OrderStatus.CANCELLED){
             List<ProductDetails> productDetails = orderItems.stream()
