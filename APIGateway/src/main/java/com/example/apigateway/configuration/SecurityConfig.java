@@ -73,6 +73,11 @@ public class SecurityConfig {
                                 "/product-service/product/return"
                         ).hasRole("ADMIN")
 
+                        .pathMatchers(
+                                HttpMethod.GET,
+                                "/user-service/users"
+                        ).hasRole("ADMIN")
+
                         .pathMatchers("/analytics-service/**").hasRole("ADMIN")
                         .anyExchange()
                         .authenticated()

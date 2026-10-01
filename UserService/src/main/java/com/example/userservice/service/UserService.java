@@ -54,9 +54,12 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse updateUser(UserUpdateRequest userUpdateRequest) {
+    public UserResponse updateUser(UserUpdateRequest userUpdateRequest, String email) {
         User user = userRepository.findByIdAndEmail(userUpdateRequest.getId(),userUpdateRequest.getEmail()).orElseThrow(
                 () -> new UserNotFoundException(userUpdateRequest.getId() + " not exist"));
+        if (! user.getEmail().equals(email)){
+            throw new UserNotFoundException("User " + userUpdateRequest.getId()+ " not exist");
+        }
         user.setName(userUpdateRequest.getName());
         user.setCity(userUpdateRequest.getCity());
         user.setPhone(userUpdateRequest.getPhone());
@@ -100,8 +103,11 @@ public class UserService {
                 .toList();
     }
 
-    public String deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
+    public String deleteUser(Long id, String email) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException("User " + id + " not exist")
+        );
+        if (! user.getEmail().equals(email)){
             throw new UserNotFoundException("User " + id + " not exist");
         }
         userRepository.deleteById(id);
